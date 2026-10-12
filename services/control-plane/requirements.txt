@@ -37,4 +37,4 @@ gunicorn==23.0.0
 
 # Dev/test dependencies
 hypothesis==6.112.0
-pytest==8.3.3
+pytest==9.0.3

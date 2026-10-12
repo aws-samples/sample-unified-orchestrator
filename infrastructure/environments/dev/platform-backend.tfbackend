@@ -1,0 +1,6 @@
+# Backend configuration for dev environment - UNO Unified Orchestrator
+# Note: Using use_lockfile = true in backend.tf, so no DynamoDB table needed
+bucket     = "haf-uno-dev-tfstate"
+key        = "unified-orchestrator/dev/terraform.tfstate"
+region     = "us-east-1"
+encrypt    = true

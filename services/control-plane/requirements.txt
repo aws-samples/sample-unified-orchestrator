@@ -1,0 +1,40 @@
+# FastAPI and ASGI server
+# Bumped 0.115.0 -> 0.115.6 (same minor) so the patched Starlette range is permitted.
+# 0.141.1 permits patched Starlette 1.1.0+ (CVE-2026-48818/54283/62727 fixes).
+fastapi==0.141.1
+uvicorn[standard]==0.30.6
+# 0.0.32 fixes CVE-2026-53539 (quadratic querystring parsing DoS).
+python-multipart==0.0.32
+pydantic-settings==2.5.2
+# 1.1.0+ fixes CVE-2026-48818 (UNC SSRF), CVE-2026-54283, CVE-2025-62727.
+starlette>=1.1.0
+
+# Authentication — Cognito JWT validation
+python-jose[cryptography]==3.4.0
+# NOTE: pyasn1 is capped at 0.4.x by python-jose's dependency tree; the patched 0.6.4
+# (CVE PYSEC-2026-2263/3455/3456/3457) is not reachable without replacing python-jose.
+# Tracked as documented dependency debt (see SECURITY.md).
+
+# HTTP client
+requests==2.33.0
+httpx>=0.27.0
+
+# Retry logic
+tenacity>=8.2.0
+
+# Utilities
+python-dotenv==1.2.2
+
+# AWS
+boto3==1.34.131
+aioboto3>=12.0.0
+
+# Utilities (file handling)
+werkzeug>=3.0.6
+
+# Production server
+gunicorn==23.0.0
+
+# Dev/test dependencies
+hypothesis==6.112.0
+pytest==8.3.3

@@ -1,0 +1,5 @@
+bucket         = "haf-uno-dev-tfstate"
+key            = "ara/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "haf-uno-dev-tfstate-lock"
+encrypt        = true

@@ -1,0 +1,4 @@
+bucket  = "haf-uno-dev-tfstate"
+key     = "ara/prod/terraform.tfstate"
+region  = "us-east-1"
+encrypt = true

@@ -1,0 +1,85 @@
+# =============================================================================
+# GitLab CI/CD Pipeline — Unified Orchestrator Platform (Monorepo)
+# Path-based triggering: only affected services are built/deployed
+# =============================================================================
+include:
+  - local: ".gitlab/ci/variables.yml"
+  - local: ".gitlab/ci/verify.yml"
+  - local: ".gitlab/ci/security.yml"
+  - local: ".gitlab/ci/platform-terraform.yml"
+  - local: ".gitlab/ci/platform-backend-deploy.yml"
+  - local: ".gitlab/ci/platform-frontend.yml"
+  - local: ".gitlab/ci/analysis-terraform.yml"
+  - local: ".gitlab/ci/analysis-backend-deploy.yml"
+  - local: ".gitlab/ci/destroy.yml"
+
+stages:
+  - verify
+  - security
+  - upload
+  - plan
+  - bootstrap
+  - apply
+  - backend-deploy
+  - frontend-deploy
+  - destroy
+  - cleanup
+
+# =============================================================================
+# Workflow Rules
+# =============================================================================
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - when: never
+
+# =============================================================================
+# Base Templates
+# =============================================================================
+
+.terraform_base:
+  image: hashicorp/terraform:${TF_VERSION}
+  before_script:
+    - apk add --no-cache aws-cli jq git python3 bash curl
+    - |
+      echo "Verifying AWS credentials..."
+      aws sts get-caller-identity
+
+# Path-based change detection templates
+.platform_changes:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - services/control-plane/**
+        - infrastructure/platform/**
+        - infrastructure/environments/**
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+      changes:
+        - services/control-plane/**
+        - infrastructure/platform/**
+        - infrastructure/environments/**
+
+.analysis_changes:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - services/analysis-engine/**
+        - infrastructure/analysis/**
+        - infrastructure/environments/**
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+      changes:
+        - services/analysis-engine/**
+        - infrastructure/analysis/**
+        - infrastructure/environments/**
+
+.frontend_changes:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - frontend/**
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/.*$/
+      changes:
+        - frontend/**

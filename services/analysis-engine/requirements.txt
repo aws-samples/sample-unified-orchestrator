@@ -1,0 +1,51 @@
+# FastAPI and ASGI server
+# 0.141.1 permits patched Starlette 1.1.0+ (CVE-2026-48818/54283/62727 fixes).
+fastapi==0.141.1
+uvicorn[standard]==0.34.0
+# 0.0.32 fixes CVE-2026-53539 (quadratic querystring parsing DoS).
+python-multipart==0.0.32
+# 1.1.0+ fixes CVE-2026-48818 (UNC SSRF), CVE-2026-54283, CVE-2025-62727.
+starlette>=1.1.0
+
+# AWS SDK
+boto3==1.35.99
+botocore==1.35.99
+
+# Strands SDK for AI agents
+strands-agents==0.1.0
+strands-agents-builder==0.1.0
+
+# AgentCore Observability (OTEL traces → CloudWatch)
+strands-agents[otel]
+aws-opentelemetry-distro
+
+# Pydantic (required by strands-agents)
+pydantic>=2.0.0,<3.0.0
+pydantic-core>=2.0.0,<3.0.0
+
+# Authentication — Cognito JWT validation
+python-jose[cryptography]==3.4.0
+# NOTE: pyasn1 is capped at 0.4.x by python-jose's dependency tree; the patched 0.6.4
+# (CVE PYSEC-2026-2263/3455/3456/3457) is not reachable without replacing python-jose.
+# Tracked as documented dependency debt (see SECURITY.md).
+
+# External integrations
+requests==2.33.0
+
+# Git and dependency analysis
+# 3.1.62 (latest) fixes the GitPython config/option/clone-injection CVE cluster:
+# CVE-2026-78676/78677/78675/76222/76220/76219/76218/67325/67323/67322 and related.
+GitPython==3.1.62
+toml==0.10.2
+packaging==24.2
+defusedxml==0.7.1
+PyYAML==6.0.2
+
+# Utilities
+python-dotenv==1.2.2
+python-dateutil==2.9.0
+
+# Production server (gunicorn with uvicorn workers)
+gunicorn==23.0.0
+
+# Authentication handled by python-jose (see above) — no external auth package needed

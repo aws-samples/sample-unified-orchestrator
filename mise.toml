@@ -1,0 +1,209 @@
+# mise.toml — Unified Orchestrator Platform task runner
+#
+# Usage:
+#   mise run setup                      # Install all dependencies
+#   mise run control-plane:start        # Start control plane (port 8000)
+#   mise run analysis:start             # Start analysis engine (port 5000)
+#   mise run frontend:start             # Start frontend dev server (port 5173)
+#   TF_ENV=nprd mise run platform:tf:init
+#   TF_ENV=nprd mise run analysis:tf:init
+
+[tools]
+terraform = "1.14.6"
+node = "20"
+"pipx:uv" = "0.8.17"
+"pipx:pre-commit" = "4.3.0"
+shellcheck = "0.11.0"
+shfmt = "3.12.0"
+
+[settings]
+experimental = true
+
+[env]
+_.python.venv = { path = ".venv", create = true }
+
+# =============================================================================
+# Setup
+# =============================================================================
+
+[tasks.setup]
+description = "Install all dependencies (Python, Node, pre-commit)"
+run = '''
+echo "==> Installing control-plane dependencies..."
+uv pip install -r services/control-plane/requirements.txt
+
+echo "==> Installing analysis-engine dependencies..."
+uv pip install -r services/analysis-engine/requirements.txt
+
+echo "==> Installing frontend dependencies..."
+cd frontend && npm install && cd ..
+
+echo "==> Installing pre-commit hooks..."
+pre-commit install
+
+echo ""
+echo "==> Setup complete!"
+'''
+
+# =============================================================================
+# Control Plane
+# =============================================================================
+
+[tasks."control-plane:start"]
+description = "Start control plane locally (port 8000)"
+dir = "services/control-plane"
+run = "python run.py"
+
+[tasks."control-plane:test"]
+description = "Run control plane tests"
+dir = "services/control-plane"
+run = "python -m pytest tests/ -v"
+
+# =============================================================================
+# Analysis Engine
+# =============================================================================
+
+[tasks."analysis:start"]
+description = "Start analysis engine locally (port 5000)"
+dir = "services/analysis-engine"
+run = "python run.py"
+
+[tasks."analysis:test"]
+description = "Run analysis engine tests"
+dir = "services/analysis-engine"
+run = "python -m pytest tests/ -v"
+
+# =============================================================================
+# Frontend
+# =============================================================================
+
+[tasks."frontend:start"]
+description = "Start frontend dev server (port 5173)"
+dir = "frontend"
+run = "npm run dev"
+
+[tasks."frontend:build"]
+description = "Build frontend for production"
+dir = "frontend"
+run = "npm run build"
+
+[tasks."frontend:test"]
+description = "Run frontend tests"
+dir = "frontend"
+run = "npm run test"
+
+# =============================================================================
+# Platform Terraform (ALB, Cognito, DynamoDB, CloudFront)
+# =============================================================================
+
+[tasks."platform:tf:init"]
+description = "Terraform init for platform infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/platform"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Platform Terraform init for ${TF_ENV}..."
+terraform init -backend-config="../environments/${TF_ENV}/platform-backend.tfbackend" -reconfigure
+'''
+
+[tasks."platform:tf:plan"]
+description = "Terraform plan for platform infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/platform"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Platform Terraform plan for ${TF_ENV}..."
+terraform plan -var-file="../environments/${TF_ENV}/platform-terraform.tfvars"
+'''
+
+[tasks."platform:tf:apply"]
+description = "Terraform apply for platform infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/platform"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Platform Terraform apply for ${TF_ENV}..."
+terraform apply -var-file="../environments/${TF_ENV}/platform-terraform.tfvars"
+'''
+
+[tasks."platform:tf:validate"]
+description = "Validate platform Terraform"
+dir = "infrastructure/platform"
+run = '''
+terraform init -backend=false
+terraform validate
+'''
+
+# =============================================================================
+# Analysis Terraform (ECS, ECR, S3, DynamoDB)
+# =============================================================================
+
+[tasks."analysis:tf:init"]
+description = "Terraform init for analysis infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/analysis"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Analysis Terraform init for ${TF_ENV}..."
+terraform init -backend-config="../environments/${TF_ENV}/analysis-backend.tfbackend" -reconfigure
+'''
+
+[tasks."analysis:tf:plan"]
+description = "Terraform plan for analysis infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/analysis"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Analysis Terraform plan for ${TF_ENV}..."
+terraform plan -var-file="../environments/${TF_ENV}/analysis-terraform.tfvars"
+'''
+
+[tasks."analysis:tf:apply"]
+description = "Terraform apply for analysis infra (uses TF_ENV, default: dev)"
+dir = "infrastructure/analysis"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+echo "==> Analysis Terraform apply for ${TF_ENV}..."
+terraform apply -var-file="../environments/${TF_ENV}/analysis-terraform.tfvars"
+'''
+
+[tasks."analysis:tf:validate"]
+description = "Validate analysis Terraform"
+dir = "infrastructure/analysis"
+run = '''
+terraform init -backend=false
+terraform validate
+'''
+
+# =============================================================================
+# CI & Security
+# =============================================================================
+
+[tasks.ci]
+description = "Run full CI checks: pre-commit + terraform validate"
+run = [
+  "pre-commit run --all-files",
+  "mise run platform:tf:validate",
+  "mise run analysis:tf:validate"
+]
+
+[tasks."security:ash"]
+description = "Run ASH security scan"
+run = "ash --config ash_config.yaml --output-dir .ash/ash_output"
+
+# =============================================================================
+# Deploy (full workflows)
+# =============================================================================
+
+[tasks."platform:deploy"]
+description = "Full platform infra deploy: init → plan → apply (uses TF_ENV)"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+TF_ENV=${TF_ENV} mise run platform:tf:init
+TF_ENV=${TF_ENV} mise run platform:tf:plan
+TF_ENV=${TF_ENV} mise run platform:tf:apply
+'''
+
+[tasks."analysis:deploy"]
+description = "Full analysis infra deploy: init → plan → apply (uses TF_ENV)"
+run = '''
+TF_ENV="${TF_ENV:-dev}"
+TF_ENV=${TF_ENV} mise run analysis:tf:init
+TF_ENV=${TF_ENV} mise run analysis:tf:plan
+TF_ENV=${TF_ENV} mise run analysis:tf:apply
+'''

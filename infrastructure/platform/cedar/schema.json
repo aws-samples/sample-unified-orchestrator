@@ -1,0 +1,135 @@
+{
+    "UNO": {
+        "entityTypes": {
+            "CognitoGroup": {},
+            "User": {
+                "memberOfTypes": [
+                    "CognitoGroup"
+                ],
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "groups": {
+                            "type": "Set",
+                            "element": {
+                                "type": "String"
+                            }
+                        },
+                        "email": {
+                            "type": "String"
+                        },
+                        "persona": {
+                            "type": "String"
+                        }
+                    }
+                }
+            },
+            "Feature": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "name": {
+                            "type": "String"
+                        },
+                        "pod_restricted": {
+                            "type": "Boolean"
+                        }
+                    }
+                }
+            },
+            "Application": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "id": {
+                            "type": "String"
+                        },
+                        "pod_id": {
+                            "type": "String"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {
+            "read": {
+                "appliesTo": {
+                    "principalTypes": [
+                        "User"
+                    ],
+                    "resourceTypes": [
+                        "Feature",
+                        "Application"
+                    ],
+                    "context": {
+                        "type": "Record",
+                        "attributes": {
+                            "http_method": {
+                                "type": "String"
+                            },
+                            "accessible_apps": {
+                                "type": "Set",
+                                "element": {
+                                    "type": "String"
+                                },
+                                "required": false
+                            },
+                            "application_id": {
+                                "type": "String",
+                                "required": false
+                            }
+                        }
+                    }
+                }
+            },
+            "write": {
+                "appliesTo": {
+                    "principalTypes": [
+                        "User"
+                    ],
+                    "resourceTypes": [
+                        "Feature",
+                        "Application"
+                    ],
+                    "context": {
+                        "type": "Record",
+                        "attributes": {
+                            "http_method": {
+                                "type": "String"
+                            },
+                            "accessible_apps": {
+                                "type": "Set",
+                                "element": {
+                                    "type": "String"
+                                },
+                                "required": false
+                            },
+                            "application_id": {
+                                "type": "String",
+                                "required": false
+                            }
+                        }
+                    }
+                }
+            },
+            "manage": {
+                "appliesTo": {
+                    "principalTypes": [
+                        "User"
+                    ],
+                    "resourceTypes": [
+                        "Feature"
+                    ],
+                    "context": {
+                        "type": "Record",
+                        "attributes": {
+                            "http_method": {
+                                "type": "String"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

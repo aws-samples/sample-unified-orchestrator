@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.cache/
+.pnpm-store/
+
+# Environment
+.env
+*.env.local
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+**/.terraform.lock.hcl
+crash.log
+security-recommendations
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Security scan outputs
+.ash/
+ash-scan-output-*/
+*-bandit-results.json
+*-checkov-results.xml
+
+# Test caches (excluded from security scans — not real secrets)
+.pytest_cache/
+
+# Mise
+.mise/mise-data/
+
+# Docker
+docker-config.json
+codeartifact-index-url.txt
+
+# Logs
+*.log
+build.log

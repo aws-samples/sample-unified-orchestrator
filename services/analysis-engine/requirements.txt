@@ -35,7 +35,7 @@ requests==2.33.0
 # Git and dependency analysis
 # 3.1.62 (latest) fixes the GitPython config/option/clone-injection CVE cluster:
 # CVE-2026-78676/78677/78675/76222/76220/76219/76218/67325/67323/67322 and related.
-GitPython==3.1.62
+GitPython==3.2.1
 toml==0.10.2
 packaging==24.2
 defusedxml==0.7.1

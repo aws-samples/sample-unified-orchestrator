@@ -12,7 +12,7 @@ boto3==1.35.99
 botocore==1.35.99
 
 # Strands SDK for AI agents
-strands-agents==0.1.0
+strands-agents==1.48.0
 strands-agents-builder==0.1.0
 
 # AgentCore Observability (OTEL traces → CloudWatch)
